@@ -1,0 +1,38 @@
+version: "3"
+services:
+  app:
+    container_name: containerize_app_1
+    # your code goes here ...
+    command: ["flask", "run", "--host", "0.0.0.0"]
+    build:
+      context: app
+    networks:
+      - app-private
+    volumes:
+      - ./app/src:/app
+    environment:
+    - FLASK_ENV=development
+  nginx:
+    container_name: containerize_nginx_1
+    # your code goes here ...
+    image: nginx:1.17.9-alpine
+    # build:
+    #   context: nginx
+    networks:
+      - app-private
+    links:
+      - app
+    volumes:
+      - ./nginx/files/:/etc/nginx/ssl
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl.conf:/etc/nginx/ssl.conf:ro
+      - ./nginx/common.conf:/etc/nginx/common.conf:ro
+      - ./nginx/common_location.conf:/etc/nginx/common_location.conf:ro
+
+    ports:
+      - "443:443"
+      - "80:80"
+    depends_on:
+      - app
+networks:
+  app-private:
